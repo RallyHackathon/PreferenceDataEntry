@@ -26,7 +26,7 @@ Ext.define('CustomApp', {
     ],
     
     appWorkspace: null,
-    appPrefName: 'buildList5',
+    appPrefName: 'buildList6',
     appPref: null,
     
     launch: function() {
@@ -75,7 +75,61 @@ Ext.define('CustomApp', {
         
         this.down('#buttonsContainer').add(button);
         
+        this._displayGrid();
+
         
+    },
+    _onButtonClick: function(){
+        
+        var buildKey=this.down('#tfK').getValue();
+        
+        var buildDateValue=this.down('#dfV').getValue();
+        var buildTimeValue=this.down('#tfV').getValue();
+        
+
+        var buildTimeStamp=new Date(buildDateValue.getFullYear()+'-'+(buildDateValue.getMonth()+1)+'-'+buildDateValue.getDate()+' '+buildTimeValue.getHours()+':'+buildTimeValue.getMinutes()+
+        
+        ':'+buildTimeValue.getSeconds());
+
+        console.log ('stamp', buildTimeStamp);
+        console.log ('buildDateValue',buildDateValue);
+        console.log ('month',buildDateValue.getMonth());
+        console.log ('day',buildDateValue.getDate());
+        console.log('appPrefValue init', this.appPrefValue);
+        
+        this.appPrefValue.push({'build' : buildKey, 'date' : buildTimeStamp.toISOString()});
+
+        console.log ('buildTimestamp to string',buildTimeStamp.toISOString());
+        var appPrefValueEncoded = Ext.JSON.encode(this.appPrefValue);
+    
+        // resave entire pref again with new build
+        var newPref = {};
+        newPref[this.appPrefName] = appPrefValueEncoded;
+
+        console.log('newPref', newPref);
+
+        Rally.data.PreferenceManager.update({
+            settings: newPref,
+            workspace: this.appWorkspace,
+            success: function(updatedRecords, notUpdatedRecords) {
+                console.log ('Pair saved', updatedRecords);
+                console.log('this',this);
+
+                this._displayGrid();
+            },
+            scope : this
+        });
+        
+    },
+    
+    _displayGrid : function (){
+        
+        if (this.prefGrid)
+        {
+            this.prefGrid.destroy();
+            console.log('grid destroyed');
+        }
+        console.log(this.down('#grid'));
         Rally.data.PreferenceManager.load({
             workspace: this.appWorkspace,
             filterByName: this.appPrefName,
@@ -102,7 +156,7 @@ Ext.define('CustomApp', {
                 console.log ('prefstore', prefStore);
                 
                 console.log('retrieved store', Ext.data.StoreManager.lookup('pStore'));
-                var prefGrid = Ext.create ('Rally.ui.grid.Grid',{
+                this.prefGrid = Ext.create ('Rally.ui.grid.Grid',{
         			itemId:'grid',
         			store: Ext.data.StoreManager.lookup('pStore'),
         			title:'BUILD HISTORY',
@@ -115,51 +169,15 @@ Ext.define('CustomApp', {
         			columnLines:true
                 
                 });
-                
-                this.add(prefGrid);
+                console.log('grid found',this.prefGrid);
+
+                this.add(this.prefGrid);
                 
             },
             scope: this
         });
-        
-
-        
-    },
-    _onButtonClick: function(){
-        
-        var buildKey=this.down('#tfK').getValue();
-        
-        var buildDateValue=this.down('#dfV').getValue();
-        var buildTimeValue=this.down('#tfV').getValue();
-        
-
-        var buildTimeStamp=new Date(buildDateValue.getFullYear()+'-'+(buildDateValue.getMonth()+1)+'-'+(buildDateValue.getDay()+1)+' '+buildTimeValue.getHours()+':'+buildTimeValue.getMinutes()+
-        
-        ':'+buildTimeValue.getSeconds());
-
-
-        console.log('appPrefValue init', this.appPrefValue);
-        
-        this.appPrefValue.push({'build' : buildKey, 'date' : buildTimeStamp.toISOString()});
-
-        console.log (buildTimeStamp.toISOString());
-
-        var appPrefValueEncoded = Ext.JSON.encode(this.appPrefValue);
-    
-        // resave entire pref again with new build
-        var newPref = {};
-        newPref[this.appPrefName] = appPrefValueEncoded;
-
-        console.log('newPref', newPref);
-
-        Rally.data.PreferenceManager.update({
-            settings: newPref,
-            workspace: this.appWorkspace,
-            success: function(updatedRecords, notUpdatedRecords) {
-                console.log ('Pair saved', updatedRecords);
-            }
-        });
-        
+ 
+           
         
     }
 });
