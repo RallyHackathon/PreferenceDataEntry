@@ -2,51 +2,53 @@ Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
     items:[
+        
         { 
             xtype :'container',
-            itemId : 'textFieldsContainer',
-            layout : 'hbox'
-        },
-        {
-            xtype:'container',
-            itemId : 'textFieldsBuildTimeContainer',
-            layout : {
-                    type :'hbox',
-            }
-            
-        },
-        {
-            xtype:'container',
-            itemId : 'buttonsContainer',
-            layout : {
-                    type :'hbox',
-            }
-            
+            itemId : 'mainContainer',
+            layout : 'hbox',
+            padding :10
         }
     ],
     
     appWorkspace: null,
     appPrefName: 'buildList6',
     appPref: null,
-    
+    buildCombobox : null,
+
     launch: function() {
-        
+
+        var buildAddContainer = Ext.create ('Ext.container.Container', {
+            itemId: 'bAddContainer',
+            layout : 'vbox',
+        });
+
+        this.buildRemoveContainer = Ext.create ('Ext.container.Container', {
+            itemId: 'bRemoveContainer',
+            layout : 'vbox'
+        });
+
+        var buildDateContainer = Ext.create ('Ext.container.Container', {
+            itemId: 'bDateContainer',
+            layout : 'hbox'
+        });
+
         this.appWorkspace = this.getContext().getWorkspaceRef();
         
         var tfKey = Ext.create('Rally.ui.TextField',
         {
             itemId: 'tfK',
-            fieldLabel : 'Build Number'
+            fieldLabel : 'Build Number',
+            padding : 10
 
         });
-        
 
-        
         var dfValue = Ext.create('Rally.ui.DateField',
         {
             itemId: 'dfV',
             fieldLabel : 'Build Date',
-            value: new Date()
+            value: new Date(),
+            padding : 10
         });
         var tfValue = Ext.create('Ext.form.field.Time',
         {
@@ -56,30 +58,60 @@ Ext.define('CustomApp', {
             minValue : '0:00',
             increment :15,
             format :'H:i',
-            value: new Date()
+            value: new Date(),
+            padding : 10
         });
 
-        
-        this.down('#textFieldsContainer').add(tfKey);
-        this.down('#textFieldsBuildTimeContainer').add(dfValue);
-        this.down('#textFieldsBuildTimeContainer').add(tfValue);
-        
-        
-        var button = Ext.create('Rally.ui.Button',
+        var buttonAdd = Ext.create('Rally.ui.Button',
         
         {
-            text: 'Add Build Pair',
-            handler: this._onButtonClick,
+            text: 'Add Build',
+            handler: this._onButtonAddClick,
             scope : this
+
         });
         
-        this.down('#buttonsContainer').add(button);
+
         
+        
+        //add build date and time text fields to build date container
+        buildDateContainer.add(dfValue);
+        buildDateContainer.add(tfValue);
+
+
+        //add build number textfield, build date container and build add button to build add container
+        buildAddContainer.add(tfKey);
+        buildAddContainer.add(buildDateContainer);
+        buildAddContainer.add(buttonAdd);
+        
+        
+        
+        //add all containers to maincontainer
+        
+        this.down('#mainContainer').add(buildAddContainer);
+        this.down('#mainContainer').add(this.buildRemoveContainer);
+        
+        
+        
+
         this._displayGrid();
 
         
     },
-    _onButtonClick: function(){
+    
+    _onButtonRemoveClick : function (){
+        
+        //filter the collection of objects and save it without the chosen one to get removed
+        console.log (this.buildCombobox);
+        var buildToRemove = this.buildCombobox.getRawValue();
+        console.log ('buildt o remove', buildToRemove);
+        return;
+        
+        
+        
+    },
+
+    _onButtonAddClick: function(){
         
         var buildKey=this.down('#tfK').getValue();
         
@@ -152,10 +184,36 @@ Ext.define('CustomApp', {
         
                 
                 });
+                //add combobox to remove build with button
+                
+                this.buildCombobox  = Ext.create('Ext.form.ComboBox', {
+                    fieldLabel: 'Choose Build',
+                    itemId: 'buildToRemoveCB',
+                    store: prefStore,
+                    //queryMode: 'local',
+                    displayField: 'build',
+                    valueField: 'date',
+                    renderTo: Ext.getBody(),
+                    scope : this
+                });
+                
+                this.buttonRemove = Ext.create('Rally.ui.Button',{
+                    text: 'Remove Build',
+                    handler: this._onButtonRemoveClick,
+                    scope : this
+        
+                });
+
+
+                //add to build remove container
+                this.down('#bRemoveContainer').add(this.buildCombobox);
+                this.down('#bRemoveContainer').add(this.buttonRemove);
+
                 
                 console.log ('prefstore', prefStore);
                 
                 console.log('retrieved store', Ext.data.StoreManager.lookup('pStore'));
+                
                 this.prefGrid = Ext.create ('Rally.ui.grid.Grid',{
         			itemId:'grid',
         			store: Ext.data.StoreManager.lookup('pStore'),
