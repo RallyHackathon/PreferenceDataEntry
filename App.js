@@ -65,7 +65,7 @@ Ext.define('CustomApp', {
         var tfValue = Ext.create('Ext.form.field.Time',
         {
             itemId: 'tfV',
-            fieldLabel : 'Build Time',
+            fieldLabel : 'Build Time (24 hour style)',
             maxValue : '23:59',
             minValue : '0:00',
             increment :15,
@@ -117,7 +117,7 @@ Ext.define('CustomApp', {
         //filter the collection of objects and save it without the chosen one to get removed
         var buildToRemove = this.buildCombobox.getRawValue();
         
-        if (buildToRemove !='')
+        if (buildToRemove !=='')
         {
             console.log ('build to remove', buildToRemove);
             
@@ -136,7 +136,7 @@ Ext.define('CustomApp', {
         
         var buildKey=this.down('#tfK').getValue();
         
-        if (buildKey !='')
+        if (buildKey !=='')
        {
            console.log ('build', buildKey);
             var buildDateValue=this.down('#dfV').getValue();
@@ -254,15 +254,15 @@ Ext.define('CustomApp', {
                 
                 this.prefGrid = Ext.create ('Rally.ui.grid.Grid',{
                     itemId:'grid',
-        			store: Ext.data.StoreManager.lookup('pStore'),
-        			title:'BUILD HISTORY',
-        			columnCfgs: [
+                    store: Ext.data.StoreManager.lookup('pStore'),
+                    title:'BUILD HISTORY',
+                    columnCfgs: [
                                 {text: 'Build', dataIndex : 'build', flex: 1},
                                 {text : 'Build Timestamp', dataIndex : 'date', flex: 5}
-        			],
-        			rowLines : true,
-        			showPagingToolbar : false,
-        			columnLines:true
+                    ],
+                    rowLines : true,
+                    showPagingToolbar : false,
+                    columnLines:true
                 
                 });
                 console.log('grid found',this.prefGrid);
