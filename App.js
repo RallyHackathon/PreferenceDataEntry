@@ -20,7 +20,7 @@ Ext.define('CustomApp', {
 
         var buildAddContainer = Ext.create ('Ext.container.Container', {
             itemId: 'bAddContainer',
-            layout : 'vbox',
+            layout : 'vbox'
         });
 
         this.buildRemoveContainer = Ext.create ('Ext.container.Container', {
@@ -107,7 +107,7 @@ Ext.define('CustomApp', {
         console.log ('build to remove', buildToRemove);
         
         //filter out 
-        var newList = _.filter(this.appPrefValue, function (num) { return num.build !=buildToRemove});
+        var newList = _.filter(this.appPrefValue, function (num) { return num.build !=buildToRemove;});
         console.log ('removed build list', newList);
         
         this._saveNewPrefs(newList);
@@ -251,16 +251,15 @@ Ext.define('CustomApp', {
 
                 
                 console.log ('prefstore', prefStore);
-                
-                console.log('retrieved store', Ext.data.StoreManager.lookup('pStore'));
+                console.log('retrieved store',Ext.data.StoreManager.lookup('pStore'));
                 
                 this.prefGrid = Ext.create ('Rally.ui.grid.Grid',{
-        			itemId:'grid',
+                    itemId:'grid',
         			store: Ext.data.StoreManager.lookup('pStore'),
         			title:'BUILD HISTORY',
         			columnCfgs: [
                                 {text: 'Build', dataIndex : 'build', flex: 1},
-                                {text : 'Build Timestamp', dataIndex : 'date', flex: 5},
+                                {text : 'Build Timestamp', dataIndex : 'date', flex: 5}
         			],
         			
         			showPagingToolbar : false,
