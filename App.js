@@ -104,10 +104,15 @@ Ext.define('CustomApp', {
         //filter the collection of objects and save it without the chosen one to get removed
         console.log (this.buildCombobox);
         var buildToRemove = this.buildCombobox.getRawValue();
-        console.log ('buildt o remove', buildToRemove);
-        return;
+        console.log ('build to remove', buildToRemove);
         
+        //filter out 
+        var newList = _.filter(this.appPrefValue, function (num) { return num.build !=buildToRemove});
+        console.log ('removed build list', newList);
         
+        this._saveNewPrefs(newList);
+
+
         
     },
 
@@ -132,6 +137,11 @@ Ext.define('CustomApp', {
         this.appPrefValue.push({'build' : buildKey, 'date' : buildTimeStamp.toISOString()});
 
         console.log ('buildTimestamp to string',buildTimeStamp.toISOString());
+        
+        this._saveNewPrefs(this.appPrefValue);
+        
+        
+        /*
         var appPrefValueEncoded = Ext.JSON.encode(this.appPrefValue);
     
         // resave entire pref again with new build
@@ -139,6 +149,7 @@ Ext.define('CustomApp', {
         newPref[this.appPrefName] = appPrefValueEncoded;
 
         console.log('newPref', newPref);
+        
 
         Rally.data.PreferenceManager.update({
             settings: newPref,
@@ -150,8 +161,30 @@ Ext.define('CustomApp', {
                 this._displayGrid();
             },
             scope : this
-        });
+        });*/
         
+    },
+    
+    _saveNewPrefs : function (prefValue){
+        
+        var appPrefValueEncoded = Ext.JSON.encode(prefValue);
+    
+        // resave entire pref again with new build
+        var newPref = {};
+        newPref[this.appPrefName] = appPrefValueEncoded;
+
+        console.log('newPref', newPref);
+        Rally.data.PreferenceManager.update({
+            settings: newPref,
+            workspace: this.appWorkspace,
+            success: function(updatedRecords, notUpdatedRecords) {
+                console.log ('Pair saved', updatedRecords);
+                console.log('this',this);
+
+                this._displayGrid();
+            },
+            scope : this
+        });
     },
     
     _displayGrid : function (){
@@ -184,17 +217,23 @@ Ext.define('CustomApp', {
         
                 
                 });
-                //add combobox to remove build with button
+                //add combobox +button to remove build with button after destroying it if exists
                 
+                if (this.buildCombobox)
+                    {
+                        this.buildCombobox.destroy();
+                        this.buttonRemove.destroy();
+                    }
+                    
                 this.buildCombobox  = Ext.create('Ext.form.ComboBox', {
-                    fieldLabel: 'Choose Build',
-                    itemId: 'buildToRemoveCB',
-                    store: prefStore,
-                    //queryMode: 'local',
-                    displayField: 'build',
-                    valueField: 'date',
-                    renderTo: Ext.getBody(),
-                    scope : this
+                fieldLabel: 'Choose Build',
+                itemId: 'buildToRemoveCB',
+                store: prefStore,
+                //queryMode: 'local',
+                displayField: 'build',
+                valueField: 'date',
+                renderTo: Ext.getBody(),
+                scope : this
                 });
                 
                 this.buttonRemove = Ext.create('Rally.ui.Button',{
@@ -203,6 +242,7 @@ Ext.define('CustomApp', {
                     scope : this
         
                 });
+                
 
 
                 //add to build remove container
