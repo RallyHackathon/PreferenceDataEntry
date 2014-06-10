@@ -6,7 +6,7 @@ Ext.define('CustomApp', {
         { 
             xtype :'container',
             itemId : 'mainContainer',
-            layout : 'hbox',
+            layout : 'vbox',
             padding :10
         }
     ],
@@ -20,12 +20,23 @@ Ext.define('CustomApp', {
 
         var buildAddContainer = Ext.create ('Ext.container.Container', {
             itemId: 'bAddContainer',
-            layout : 'vbox'
+            layout : 'vbox',
+            width : 600,
+            height : 120,
+            border: '0 0 1 0',
+            style: {
+                borderColor: 'grey',
+                borderStyle: 'solid'
+            }
+
         });
 
         this.buildRemoveContainer = Ext.create ('Ext.container.Container', {
             itemId: 'bRemoveContainer',
-            layout : 'vbox'
+            layout : 'vbox',
+            width : 600,
+            height : 60
+
         });
 
         var buildDateContainer = Ext.create ('Ext.container.Container', {
@@ -66,6 +77,7 @@ Ext.define('CustomApp', {
         
         {
             text: 'Add Build',
+            width : 100,
             handler: this._onButtonAddClick,
             scope : this
 
@@ -140,29 +152,7 @@ Ext.define('CustomApp', {
         
         this._saveNewPrefs(this.appPrefValue);
         
-        
-        /*
-        var appPrefValueEncoded = Ext.JSON.encode(this.appPrefValue);
-    
-        // resave entire pref again with new build
-        var newPref = {};
-        newPref[this.appPrefName] = appPrefValueEncoded;
 
-        console.log('newPref', newPref);
-        
-
-        Rally.data.PreferenceManager.update({
-            settings: newPref,
-            workspace: this.appWorkspace,
-            success: function(updatedRecords, notUpdatedRecords) {
-                console.log ('Pair saved', updatedRecords);
-                console.log('this',this);
-
-                this._displayGrid();
-            },
-            scope : this
-        });*/
-        
     },
     
     _saveNewPrefs : function (prefValue){
@@ -226,18 +216,19 @@ Ext.define('CustomApp', {
                     }
                     
                 this.buildCombobox  = Ext.create('Ext.form.ComboBox', {
-                fieldLabel: 'Choose Build',
-                itemId: 'buildToRemoveCB',
-                store: prefStore,
-                //queryMode: 'local',
-                displayField: 'build',
-                valueField: 'date',
-                renderTo: Ext.getBody(),
-                scope : this
+                    fieldLabel: 'Choose Build',
+                    itemId: 'buildToRemoveCB',
+                    store: prefStore,
+                    //queryMode: 'local',
+                    displayField: 'build',
+                    valueField: 'date',
+                    renderTo: Ext.getBody(),
+                    scope : this
                 });
                 
                 this.buttonRemove = Ext.create('Rally.ui.Button',{
                     text: 'Remove Build',
+                    width : 100,
                     handler: this._onButtonRemoveClick,
                     scope : this
         
@@ -261,7 +252,7 @@ Ext.define('CustomApp', {
                                 {text: 'Build', dataIndex : 'build', flex: 1},
                                 {text : 'Build Timestamp', dataIndex : 'date', flex: 5}
         			],
-        			
+        			rowLines : true,
         			showPagingToolbar : false,
         			columnLines:true
                 
