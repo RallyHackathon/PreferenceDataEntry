@@ -35,7 +35,8 @@ Ext.define('CustomApp', {
             itemId: 'bRemoveContainer',
             layout : 'vbox',
             width : 600,
-            height : 60
+            height : 60,
+            padding : '10 0 0 0'
 
         });
 
@@ -114,15 +115,18 @@ Ext.define('CustomApp', {
     _onButtonRemoveClick : function (){
         
         //filter the collection of objects and save it without the chosen one to get removed
-        console.log (this.buildCombobox);
         var buildToRemove = this.buildCombobox.getRawValue();
-        console.log ('build to remove', buildToRemove);
         
-        //filter out 
-        var newList = _.filter(this.appPrefValue, function (num) { return num.build !=buildToRemove;});
-        console.log ('removed build list', newList);
-        
-        this._saveNewPrefs(newList);
+        if (buildToRemove !='')
+        {
+            console.log ('build to remove', buildToRemove);
+            
+            //filter out 
+            var newList = _.filter(this.appPrefValue, function (num) { return num.build !=buildToRemove;});
+            console.log ('removed build list', newList);
+            
+            this._saveNewPrefs(newList);
+        }
 
 
         
@@ -132,25 +136,29 @@ Ext.define('CustomApp', {
         
         var buildKey=this.down('#tfK').getValue();
         
-        var buildDateValue=this.down('#dfV').getValue();
-        var buildTimeValue=this.down('#tfV').getValue();
-        
-
-        var buildTimeStamp=new Date(buildDateValue.getFullYear()+'-'+(buildDateValue.getMonth()+1)+'-'+buildDateValue.getDate()+' '+buildTimeValue.getHours()+':'+buildTimeValue.getMinutes()+
-        
-        ':'+buildTimeValue.getSeconds());
-
-        console.log ('stamp', buildTimeStamp);
-        console.log ('buildDateValue',buildDateValue);
-        console.log ('month',buildDateValue.getMonth());
-        console.log ('day',buildDateValue.getDate());
-        console.log('appPrefValue init', this.appPrefValue);
-        
-        this.appPrefValue.push({'build' : buildKey, 'date' : buildTimeStamp.toISOString()});
-
-        console.log ('buildTimestamp to string',buildTimeStamp.toISOString());
-        
-        this._saveNewPrefs(this.appPrefValue);
+        if (buildKey !='')
+       {
+           console.log ('build', buildKey);
+            var buildDateValue=this.down('#dfV').getValue();
+            var buildTimeValue=this.down('#tfV').getValue();
+            
+    
+            var buildTimeStamp=new Date(buildDateValue.getFullYear()+'-'+(buildDateValue.getMonth()+1)+'-'+buildDateValue.getDate()+' '+buildTimeValue.getHours()+':'+buildTimeValue.getMinutes()+
+            
+            ':'+buildTimeValue.getSeconds());
+    
+            console.log ('stamp', buildTimeStamp);
+            console.log ('buildDateValue',buildDateValue);
+            console.log ('month',buildDateValue.getMonth());
+            console.log ('day',buildDateValue.getDate());
+            console.log('appPrefValue init', this.appPrefValue);
+            
+            this.appPrefValue.push({'build' : buildKey, 'date' : buildTimeStamp.toISOString()});
+    
+            console.log ('buildTimestamp to string',buildTimeStamp.toISOString());
+            
+            this._saveNewPrefs(this.appPrefValue);
+       }
         
 
     },
