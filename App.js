@@ -12,7 +12,7 @@ Ext.define('CustomApp', {
     ],
     
     appWorkspace: null,
-    appPrefName: 'buildList6',
+    appPrefName: 'buildList7',
     appPref: null,
     buildCombobox : null,
     rCB : null,
@@ -181,10 +181,13 @@ Ext.define('CustomApp', {
             console.log ('month',buildDateValue.getMonth());
             console.log ('day',buildDateValue.getDate());
             console.log('appPrefValue init', this.appPrefValue);
+            var chosenRelease = this.rCB.getValue();
             
-            this.appPrefValue.push({'build' : buildKey, 'date' : buildTimeStamp.toISOString()});
+            this.appPrefValue.push({'build' : buildKey, 'date' : buildTimeStamp.toISOString(), 'release': chosenRelease});
     
             console.log ('buildTimestamp to string',buildTimeStamp.toISOString());
+            
+            console.log ('this.appPrefValue',this.appPrefValue);
             
             this._saveNewPrefs(this.appPrefValue);
        }
@@ -234,19 +237,17 @@ Ext.define('CustomApp', {
                 
                 var relEndDate = this.rCB.findRecordByValue(this.rCB.getValue()).get('ReleaseDate').toISOString();
                 var relStartDate = this.rCB.findRecordByValue(this.rCB.getValue()).get('ReleaseStartDate').toISOString();
-
+                var relValue=this.rCB.getValue();
                 
                 console.log ('release start date', relStartDate);
                 console.log ('release end date', relEndDate);
                 
                 
-                //filter original array of objects returned y the preference read and add only objects that have date key value within release chosen timebox
+                //filter original array of objects returned by the preference read and add only objects that have date key value within release chosen timebox
                 
                 
                 this.relBuildsPrefValues = _.filter(this.appPrefValue,function(obj){
-                    console.log ('obj.date',obj.date);
-                    console.log ('relendDate',relEndDate);
-                    return ((obj.date < relEndDate) && (obj.date > relStartDate));
+                    return (obj.release === relValue);
                     
                 });
                 console.log ('filtered builds',this.relBuildsPrefValues );
