@@ -15,19 +15,25 @@ Ext.define('CustomApp', {
     appPrefName: 'buildList6',
     appPref: null,
     buildCombobox : null,
-
+    rCB : null,
     launch: function() {
 
         var buildAddContainer = Ext.create ('Ext.container.Container', {
             itemId: 'bAddContainer',
             layout : 'vbox',
             width : 600,
-            height : 120,
+            height : 160,
             border: '0 0 1 0',
             style: {
                 borderColor: 'grey',
                 borderStyle: 'solid'
-            }
+            },
+            padding : '0 0 10 0'
+
+        });
+        var buildAddContainerInner = Ext.create ('Ext.container.Container', {
+            itemId: 'bAddContainerInner',
+            layout : 'vbox'
 
         });
 
@@ -46,6 +52,8 @@ Ext.define('CustomApp', {
         });
 
         this.appWorkspace = this.getContext().getWorkspaceRef();
+        
+
         
         var tfKey = Ext.create('Rally.ui.TextField',
         {
@@ -83,9 +91,31 @@ Ext.define('CustomApp', {
             scope : this
 
         });
-        
+        this.rCB = Ext.create('Rally.ui.combobox.ReleaseComboBox',{
+            itemId: 'relCB',
+            listeners: {
+                /*ready : function(rCombobox){
+                    console.log('ready');
+                    buildAddContainer.add(buttonAdd);
+                //console.log('release chosen', this.rCB.findRecordByValue(this.rCB.getValue()).get('ReleaseDate'));
+                this._displayGrid();
+                
+                
+                },*/
+                change : function (){
+                    
+                    buildAddContainer.add(buttonAdd);
 
+                    console.log ('changed');
+                    this._displayGrid();
+                },
+                scope : this
+            
+            }
         
+        });
+        //console.log (rCB);
+
         
         //add build date and time text fields to build date container
         buildDateContainer.add(dfValue);
@@ -93,9 +123,12 @@ Ext.define('CustomApp', {
 
 
         //add build number textfield, build date container and build add button to build add container
-        buildAddContainer.add(tfKey);
-        buildAddContainer.add(buildDateContainer);
-        buildAddContainer.add(buttonAdd);
+        buildAddContainerInner.add(this.rCB);
+        buildAddContainerInner.add(tfKey);
+        buildAddContainerInner.add(buildDateContainer);
+        buildAddContainerInner.add(buttonAdd);
+        
+        buildAddContainer.add(buildAddContainerInner);
         
         
         
@@ -103,11 +136,7 @@ Ext.define('CustomApp', {
         
         this.down('#mainContainer').add(buildAddContainer);
         this.down('#mainContainer').add(this.buildRemoveContainer);
-        
-        
-        
 
-        this._displayGrid();
 
         
     },
@@ -201,8 +230,31 @@ Ext.define('CustomApp', {
                 var decodedPrefValue = Ext.JSON.decode(pref[this.appPrefName]);
                 this.appPrefValue = (decodedPrefValue === undefined) ? [] : decodedPrefValue;
                 console.log('decoded pref value', this.appPrefValue);
-                var prefStore = Ext.create("Rally.data.custom.Store", {
-                    data: this.appPrefValue,
+                
+                
+                var relEndDate = this.rCB.findRecordByValue(this.rCB.getValue()).get('ReleaseDate').toISOString();
+                var relStartDate = this.rCB.findRecordByValue(this.rCB.getValue()).get('ReleaseStartDate').toISOString();
+
+                
+                console.log ('release start date', relStartDate);
+                console.log ('release end date', relEndDate);
+                
+                
+                //filter original array of objects returned y the preference read and add only objects that have date key value within release chosen timebox
+                
+                
+                this.relBuildsPrefValues = _.filter(this.appPrefValue,function(obj){
+                    console.log ('obj.date',obj.date);
+                    console.log ('relendDate',relEndDate);
+                    return ((obj.date < relEndDate) && (obj.date > relStartDate));
+                    
+                });
+                console.log ('filtered builds',this.relBuildsPrefValues );
+
+                var prefStoreRelease = Ext.create("Rally.data.custom.Store", {
+                    //data: this.appPrefValue,
+                    data: this.relBuildsPrefValues,
+
                     storeId: 'pStore',
                     columnCfgs: [
                         {
@@ -211,8 +263,7 @@ Ext.define('CustomApp', {
                         {
                             text: 'Build Timestamp', dataIndex: 'date'
                         }
-                        ]
-        
+                    ]
                 
                 });
                 //add combobox +button to remove build with button after destroying it if exists
@@ -226,7 +277,7 @@ Ext.define('CustomApp', {
                 this.buildCombobox  = Ext.create('Ext.form.ComboBox', {
                     fieldLabel: 'Choose Build',
                     itemId: 'buildToRemoveCB',
-                    store: prefStore,
+                    store: prefStoreRelease,
                     //queryMode: 'local',
                     displayField: 'build',
                     valueField: 'date',
@@ -249,7 +300,7 @@ Ext.define('CustomApp', {
                 this.down('#bRemoveContainer').add(this.buttonRemove);
 
                 
-                console.log ('prefstore', prefStore);
+                //console.log ('prefstore', prefStore);
                 console.log('retrieved store',Ext.data.StoreManager.lookup('pStore'));
                 
                 this.prefGrid = Ext.create ('Rally.ui.grid.Grid',{
